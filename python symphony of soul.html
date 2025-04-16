@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Frontend Talking to Python</title>
+<style>
+  body { font-family: sans-serif; }
+  #data-display { margin-top: 15px; padding: 10px; border: 1px solid #ccc; min-height: 40px; background-color: #f9f9f9;}
+  button { margin: 5px; }
+</style>
+</head>
+<body>
+
+<h1>CodePen Front-End</h1>
+<p>Interacting with a separate Python backend.</p>
+
+<button id="get-data-button">Get Data from Python API</button>
+<button id="post-data-button">Send Data to Python API</button>
+
+<div id="data-display">API responses will appear here...</div>
+
+<script>
+  const dataDisplay = document.getElementById('data-display');
+  const getDataButton = document.getElementById('get-data-button');
+  const postDataButton = document.getElementById('post-data-button');
+
+  // !!! IMPORTANT: Replace with the ACTUAL URL where your Python API is running
+  // If running locally: 'http://localhost:5000/api/data' or 'http://127.0.0.1:5000/api/data'
+  // If deployed: 'https://your-deployed-api.com/api/data'
+  const backendApiUrl = 'http://localhost:5000/api/data';
+
+  // --- GET Request ---
+  getDataButton.addEventListener('click', () => {
+    dataDisplay.textContent = 'Fetching data...';
+    fetch(backendApiUrl) // Default method is GET
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json(); // Parse the JSON data from the response
+      })
+      .then(data => {
+        console.log('Data received (GET):', data);
+        dataDisplay.textContent = `Python says: ${data.message}`;
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        dataDisplay.textContent = `Error fetching data: ${error}. Is the Python server running at ${backendApiUrl}?`;
+      });
+  });
+
+  // --- POST Request ---
+  postDataButton.addEventListener('click', () => {
+    const dataToSend = {
+      name: 'CodePen User',
+      timestamp: new Date().toISOString()
+    };
+
+    dataDisplay.textContent = 'Sending data...';
+
+    fetch(backendApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json' // Tell the server we're sending JSON
+      },
+      body: JSON.stringify(dataToSend) // Convert JS object to JSON string
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Response received (POST):', data);
+        dataDisplay.textContent = 'Data sent! Python responded: ' + JSON.stringify(data);
+      })
+      .catch(error => {
+        console.error('Error posting data:', error);
+        dataDisplay.textContent = `Error sending data: ${error}. Is the Python server running at ${backendApiUrl}?`;
+      });
+  });
+</script>
+
+</body>
+</html>
